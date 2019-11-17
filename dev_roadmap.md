@@ -1,83 +1,61 @@
+## New Instructions
+```bash
+# Install
+$ git clone https://github.com/tabarra/txAdmin && cd txAdmin
+$ npm i
+
+# Add admin
+$ node src/scripts/admin-add.js
+
+# Setup default server
+$ node src/scripts/setup.js default
+
+# Start default server
+$ node src/index.js default
+```
+
 ## TODO/Roadmap:
-Major stuff:
-- [ ] Check compiling libraries like pkg and nexe.
-- [ ] Check config management libraries (specially 'convict' by Mozilla and nconf)
-- [ ] Auto updater with simple-git/promise
-- [ ] Make messages/commands.json via lowdb and remove the `Players online` and `File reloaded` spam.
+> v1.0.5
+- [x] adapt admin-add
+- [x] adapt config-tester
+- [x] adapt main
+- [x] write setup
+- [x] prevent starting with null as options
+- [x] make settings page
+- [x] create config vault component
+- [x] settings page validate fxserver paths
+- [x] settings page save the new settings
+- [x] settings page for the other scopes
+- [x] fxrunner detect the endpoint ports
+- [x] rewrite README, Troubleshooting Guide
+> v1.1.0
+- [x] Make fxserver output buffer class and integrate
+- [x] download server log button/endpoint
+- [x] add buffer size to the dashboard
+> v1.2.0
+- [x] parse the schedule times
+- [x] send message to chat
+- [x] announcements channel in discord config page
+- [x] announce discord autorestarts and when the server is started/restarted
+> v1.3.0
+- [x] create admin page template
+- [x] use the admin data inside the template
+- [x] admin add/edit/delete html/js/endpoints
+> v1.4.0
+- [x] create methods to evaluate permission and apply to all endpoints
+- [x] write doc text for the permissions
+> v1.5.0
+- [x] resource injection
+- [x] error handler to remove the old txAdminClient
+> v1.6.0
+- [x] temp intercom endpoint
+- [x] make txAdminClient report it's alive
+- [x] prevent auto restarter from killing a working server
+- [x] normalize paths when saving the settings
+> v1.7.0 BETA Release
+- [ ] custom commands
+- [ ] ???
 
-Medium stuff:
-- [ ] Add "discord client id" in the admin settings, this would enable "/kick @user"
-
-Minor stuff:
-- [ ] Hide the verbosity option. People don't fucking read and click on it anyway,
-- [ ] xxxxxx
-
-
-### Feature tasks for collaborators:
-- Logger:
-    - [-] Revert txAdminClient cl_logger.js back into lua and fix the mismatch of killer ID from client to server
-    - [ ] Listen for the most common vRP and ESX server events and log them
-    - [x] Divide the interface vertically, and on the right add filter options (HTML/CSS Only)
-    - [ ] Make the javascript for hiding events based on the `data-event-type` attribute
-    - [.] Create a "load more" at the top of the log, for the admin too be able to see older entries.
-- [x] When restarting the server, add the name of the admin to the chat/discord messages.
-- [x] When sending a DM as admin, add the name of the admin
-- [x] Add localized uptime to the /status command and review the usage of the dateformat lib
-- [x] Add to the resources page an option to see/hide the default cfx resources
-- [ ] Dark Theme!
-
-x = done
-- = being worked on
-. = on hold
-
-
-## Links
-https://www.science.co.il/language/Locale-codes.php
-https://www.npmjs.com/package/humanize-duration
-https://www.npmjs.com/package/dateformat
-https://www.npmjs.com/package/dateformat-light
-https://date-fns.org/v2.0.1/docs/formatDistance
-
-https://www.reddit.com/r/javascript/comments/91a3tp/why_is_there_no_small_sane_nodejs_tool_for/
-
-DIV transition: https://tympanus.net/Tutorials/OriginalHoverEffects/index9.html
-
-
-## TODO Now
-- [x] freeze detector
-- [x] inject via tmp file
-- [x] experiements dropdown menu + ban page html/js
-- [x] database module
-- [x] functional ban page with ban add, list and export
-- [x] ban feature at sv_main.lua
-- [x] tie everything correctly and push update
-- [x] fix playerlist div name issue
-- [x] Fix paths with spaces (too hard, just block in the settings page)
-- [ ] Apple xss whitelist [] to all xss() calls (vide src\webroutes\diagnostics-log.js)
-
-## Databases:
-Discarted due to node-gyp: level, better-sqlite3, sqlite3
-
-- dblite
-    - 165/week  
-    - 0 deps  
-    - 6 months ago  
-    - spawn sqlite-shell  
-- lowdb
-    - 183k/week  
-    - 5 deps  
-    - 2 years ago  
-    - lodash front end, can query data  
-- sql.js
-    - 26k/week  
-    - 0 deps  
-    - 4 months ago  
-    - sqlite c into webassembly  
-
-
-## Ideas:
-Automatic event detection by regexing all .lua files in the resources folder?  
-`AddEventHandler\(["'](.+)["'].*`
 
 
 ## Folder Structure

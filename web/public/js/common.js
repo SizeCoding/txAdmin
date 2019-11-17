@@ -2,8 +2,9 @@
 //============================================== Dynamic Stats
 //================================================================
 function refreshData() {
+    // console.log('hellooo' + Math.random())
     $.ajax({
-        url: "/status",
+        url: "/getStatus",
         type: "GET",
         dataType: "json",
         timeout: 1500,
@@ -73,9 +74,10 @@ function showPlayer(id) {
 }
 
 
+
 function messagePlayer(id) {
     $('#modPlayerInfo').modal('hide');
-    let message = prompt('Type your message');
+    let message = prompt('Do something?');
     if(!message || message.length === 0) return;
 
     var notify = $.notify({ message: '<p class="text-center">Executing Command...</p>'}, {});
@@ -86,7 +88,7 @@ function messagePlayer(id) {
     }
     $.ajax({
         type: "POST",
-        url: '/fxserver/commands',
+        url: '/fxCommands',
         timeout: 2000,
         data: data,
         // dataType: 'json',
@@ -102,22 +104,22 @@ function messagePlayer(id) {
         }
     });
 }
+
+
+
 
 
 function kickPlayer(id) {
     $('#modPlayerInfo').modal('hide');
-    let reason = prompt('Type the kick reason or leave it blank (press enter)');
-    if(reason == null) return;
-
     var notify = $.notify({ message: '<p class="text-center">Executing Command...</p>'}, {});
 
     let data = {
         action: 'kick_player',
-        parameter: [id, reason]
+        parameter: id
     }
     $.ajax({
         type: "POST",
-        url: '/fxserver/commands',
+        url: '/fxCommands',
         timeout: 2000,
         data: data,
         // dataType: 'json',
@@ -136,66 +138,6 @@ function kickPlayer(id) {
 
 
 
-//================================================================
-//========================================== Change Password Modal
-//================================================================
-function changeOwnPasswordModal() {
-    $('#modChangePassword').modal('show');
-}
-
-$('#modChangePassword-save').click(function () {
-    let data = {
-        oldPassword: $('#modChangePassword-oldPassword').val().trim(),
-        newPassword: $('#modChangePassword-newPassword').val().trim(),
-        confirmPassword: $('#modChangePassword-confirmPassword').val().trim()
-    }
-
-    //Validity Checking
-    let errors = [];
-    if (!data.oldPassword.length || !data.newPassword.length || !data.confirmPassword.length) {
-        errors.push('All 3 fields are required.');
-    }
-    if(data.newPassword !== data.confirmPassword){
-        errors.push(`Your new password doesn't match the one typed in the confirmation input.`);
-    }
-    if(data.oldPassword === data.confirmPassword){
-        errors.push(`The new password must be different than the old one.`);
-    }
-    if(data.newPassword.length < 6 || data.newPassword.length > 16){
-        errors.push(`The new password have between 6 and 16 characters.`);
-    }
-    if(errors.length){
-        var notify = $.notify({ message: '<b>Errors:</b><br> - ' + errors.join(' <br>\n - ') }, { type: 'warning' });
-        return;
-    }
-
-    var notify = $.notify({ message: '<p class="text-center">Saving...</p>' }, {});
-
-    $.ajax({
-        type: "POST",
-        url: '/changePassword',
-        timeout: 2000,
-        data: data,
-        dataType: 'json',
-        success: function (data) {
-            notify.update('progress', 0);
-            notify.update('type', data.type);
-            notify.update('message', data.message);
-            $('#modChangePassword').modal('hide');
-        },
-        error: function (xmlhttprequest, textstatus, message) {
-            notify.update('progress', 0);
-            notify.update('type', 'danger');
-            notify.update('message', message);
-            $('#modChangePassword').modal('hide');
-        }
-    });
-});
-
-
-
-
-//========================================== Page load
 $(document).ready(function() {
     $.notifyDefaults({
         z_index: 2000,

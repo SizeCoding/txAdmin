@@ -1,59 +1,3 @@
-## Around v1.12:
-- [x] Do something in case fxserver's tcp/http endpoint dies for more than 5 minutes
-- [x] Let admins change their password
-- [x] Create a init.cfg for the fxserver to execute containing all txAdmin commands
-- [x] Improve server log page 
-- [x] Remove del in favour of fs-extra.emptyDir https://github.com/jprichardson/node-fs-extra/blob/master/docs/emptyDir.md
-- [x] Remove figlet (also from the login page)
-- [x] Remove pretty-ms
-- [x] Improve CSS of the log pages on mobile, they look too tiny
-
-
-## Settings Roadmap/TODO:
-> v1.0.5
-- [x] adapt admin-add
-- [x] adapt config-tester
-- [x] adapt main
-- [x] write setup
-- [x] prevent starting with null as options
-- [x] make settings page
-- [x] create config vault component
-- [x] settings page validate fxserver paths
-- [x] settings page save the new settings
-- [x] settings page for the other scopes
-- [x] fxrunner detect the endpoint ports
-- [x] rewrite README, Troubleshooting Guide
-> v1.1.0
-- [x] Make fxserver output buffer class and integrate
-- [x] download server log button/endpoint
-- [x] add buffer size to the dashboard
-> v1.2.0
-- [x] parse the schedule times
-- [x] send message to chat
-- [x] announcements channel in discord config page
-- [x] announce discord autorestarts and when the server is started/restarted
-> v1.3.0
-- [x] create admin page template
-- [x] use the admin data inside the template
-- [x] admin add/edit/delete html/js/endpoints
-> v1.4.0
-- [x] create methods to evaluate permission and apply to all endpoints
-- [x] write doc text for the permissions
-> v1.5.0
-- [x] resource injection
-- [x] error handler to remove the old txAdminClient
-> v1.6.0
-- [x] temp intercom endpoint
-- [x] make txAdminClient report it's alive
-- [x] prevent auto restarter from killing a working server
-- [x] normalize paths when saving the settings
-> v1.7.0 BETA Release
-- [ ] ???
-
-
-----------
-
-
 ## Interface Rework TODO:
 - [x] make 80% of all pages html/css (in php)
 - [x] remake webUtils templating
@@ -87,8 +31,7 @@ More:
 - [x] include the resource and related docs
 - [x] bump version
 
-
-----------
+---
 
 
 ## Older TODO:
@@ -118,6 +61,3 @@ And more...
 - [x] Configurable discord bot static responses. This should be a separate file like the admins one.
 - [x] Improve fxRunner/actions responses. Currently it's only 'Done'.
 - [x] Add a `more info` tab and include some config variables, and the complete PID breakdown
-- [ ] FXServer artifact/build auto updater??? (rejected)
-- [x] Automagically send messages in discord when starting/stopping/restarting the server
-- [x] We have data, we should plot it into a graph...

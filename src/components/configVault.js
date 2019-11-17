@@ -68,7 +68,7 @@ module.exports = class ConfigVault {
         try {
             cfgData = JSON.parse(rawFile);
         } catch (error) {
-            if(rawFile.includes('\\')) logError(`Note: your 'data/${this.serverProfile}/config.json' file contains '\\', make sure all your paths use only '/'.`, context);
+            if(rawFile.includes('\\')) logError(`Note: your '${this.serverProfile}.json' file contains '\\', make sure all your paths use only '/'.`, context);
             throw new Error(`Unnable to load configuration file '${this.configFilePath}'. (json parse error, please read the documentation)\nOriginal error: ${error.message}`, error.stack);
         }
 
@@ -99,13 +99,13 @@ module.exports = class ConfigVault {
                 verbose: toDefault(cfg.global.verbose, null),
                 publicIP:  toDefault(cfg.global.publicIP, null),
                 serverName:  toDefault(cfg.global.serverName, null),
-                language:  toDefault(cfg.global.language, null),
-                forceFXServerPort:  toDefault(cfg.global.forceFXServerPort, null), //not in template
+                forceFXServerPort:  toDefault(cfg.global.forceFXServerPort, null),
             };
             out.logger = {
                 logPath: toDefault(cfg.logger.logPath, null), //not in template
             };
             out.monitor = {
+                interval: toDefault(cfg.monitor.interval, null), //not in template
                 timeout: toDefault(cfg.monitor.timeout, null),
                 restarter: {
                     cooldown: toDefault(cfg.monitor.restarter.cooldown, null), //not in template
@@ -121,8 +121,6 @@ module.exports = class ConfigVault {
                 bufferTime: toDefault(cfg.webServer.bufferTime, null), //not in template - deprecate?
                 limiterMinutes: toDefault(cfg.webServer.limiterMinutes, null), //not in template
                 limiterAttempts: toDefault(cfg.webServer.limiterAttempts, null), //not in template
-                enableHTTPS: toDefault(cfg.webServer.enableHTTPS, null), //not in template [BETA]
-                httpsPort: toDefault(cfg.webServer.httpsPort, null), //not in template [BETA]
             };
             out.webConsole = {
                 //nothing to configure
@@ -134,7 +132,6 @@ module.exports = class ConfigVault {
                 messagesFilePath: toDefault(cfg.discordBot.messagesFilePath, null), //not in template
                 refreshInterval: toDefault(cfg.discordBot.refreshInterval, null), //not in template
                 statusCommand: toDefault(cfg.discordBot.statusCommand, null),
-                commandCooldown: toDefault(cfg.discordBot.commandCooldown, null), //not in template
             };
             out.fxRunner = {
                 buildPath: toDefault(cfg.fxRunner.buildPath, null),
@@ -169,7 +166,6 @@ module.exports = class ConfigVault {
             cfg.global.verbose = (cfg.global.verbose === 'true' || cfg.global.verbose === true);
             cfg.global.publicIP = cfg.global.publicIP || "change-me";
             cfg.global.serverName = cfg.global.serverName || "change-me";
-            cfg.global.language = cfg.global.language || "en";
 
             //Global - Extras
             cfg.global.osType = os.type() || 'unknown';
@@ -180,8 +176,9 @@ module.exports = class ConfigVault {
             cfg.logger.logPath = cfg.logger.logPath || `${this.serverProfilePath}/logs/admin.log`; //not in template
 
             //Monitor
+            cfg.monitor.interval = parseInt(cfg.monitor.interval) || 1000; //not in template
             cfg.monitor.timeout = parseInt(cfg.monitor.timeout) || 1000;
-            cfg.monitor.restarter.cooldown = parseInt(cfg.monitor.restarter.cooldown) || 60; //not in template
+            cfg.monitor.restarter.cooldown = parseInt(cfg.monitor.restarter.cooldown) || 120; //not in template
             cfg.monitor.restarter.failures = parseInt(cfg.monitor.restarter.failures) || 30;
             cfg.monitor.restarter.schedule = cfg.monitor.restarter.schedule || [];
 
@@ -193,22 +190,19 @@ module.exports = class ConfigVault {
             cfg.webServer.bufferTime = parseInt(cfg.webServer.bufferTime) || 1500; //not in template - deprecate?
             cfg.webServer.limiterMinutes = parseInt(cfg.webServer.limiterMinutes) || 15; //not in template
             cfg.webServer.limiterAttempts = parseInt(cfg.webServer.limiterAttempts) || 5; //not in template
-            cfg.webServer.enableHTTPS = (cfg.webServer.enableHTTPS === 'true' || cfg.webServer.enableHTTPS === true); //not in template [BETA]
-            cfg.webServer.httpsPort = parseInt(cfg.webServer.httpsPort) || 50120; //not in template [BETA]
 
             //DiscordBot
             cfg.discordBot.enabled = (cfg.discordBot.enabled === 'true' || cfg.discordBot.enabled === true);
             cfg.discordBot.messagesFilePath = cfg.discordBot.messagesFilePath || `${this.serverProfilePath}/messages.json`; //not in template
             cfg.discordBot.refreshInterval = parseInt(cfg.discordBot.refreshInterval) || 15000; //not in template
             cfg.discordBot.statusCommand = cfg.discordBot.statusCommand || "/status";
-            cfg.discordBot.commandCooldown = parseInt(cfg.discordBot.commandCooldown) || 30; //not in template
 
             //FXRunner
             cfg.fxRunner.logPath = cfg.fxRunner.logPath || `${this.serverProfilePath}/logs/fxserver.log`; //not in template
             cfg.fxRunner.setPriority = cfg.fxRunner.setPriority || "NORMAL";
             cfg.fxRunner.onesync = (cfg.fxRunner.onesync === 'true' || cfg.fxRunner.onesync === true);
             cfg.fxRunner.autostart = (cfg.fxRunner.autostart === 'true' || cfg.fxRunner.autostart === true);
-            cfg.fxRunner.autostartDelay = parseInt(cfg.webServer.autostartDelay) || 2; //not in template
+            cfg.fxRunner.autostartDelay = parseInt(cfg.webServer.autostartDelay) || 3; //not in template
             cfg.fxRunner.quiet = (cfg.fxRunner.quiet === 'true' || cfg.fxRunner.quiet === true);
         } catch (error) {
             throw new Error(`Malformed configuration file! Please copy server-template.json and try again.\nOriginal error: ${error.message}`, error.stack);

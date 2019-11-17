@@ -1,5 +1,5 @@
 {
-    "version": "1.14.1",
+    "version": "1.7.3",
     "changelog": "Deprecated Message. Please Update.",
     "allVersions": [
         {
@@ -65,74 +65,6 @@
         {
             "version": "1.7.3",
             "changelog": "Minor bug fixes and improved some settings descriptions and error messages."
-        },
-        {
-            "version": "1.7.4",
-            "changelog": "Added beta support for HTTPS/SSL. Added kick reason. Minor bug fixes."
-        },
-        {
-            "version": "1.8.0",
-            "changelog": "Added translation support for Chat/Discord messages."
-        },
-        {
-            "version": "1.8.1",
-            "changelog": "Quickfix for Linux instances."
-        },
-        {
-            "version": "1.9.0",
-            "changelog": "Added a resources page. Added Czech, Romanian and German translations."
-        },
-        {
-            "version": "1.10.0",
-            "changelog": "Added Server Activity Log (BETA). Added Discord command spam protection. Added more languages. Bug fixes."
-        },
-        {
-            "version": "1.10.1",
-            "changelog": "Fixed resource injection for new installations."
-        },
-        {
-            "version": "1.11.3",
-            "changelog": "Fixed error 413. Multiple bug fixes and improvements."
-        },
-        {
-            "version": "1.11.4",
-            "changelog": "Optimized txAdmin (40% less dependecies). Improved some pages on Mobile."
-        },
-        {
-            "version": "1.11.5",
-            "changelog": "Added option to change own password."
-        },
-        {
-            "version": "1.11.6",
-            "changelog": "Reorganized some internal files."
-        },
-        {
-            "version": "1.11.7",
-            "changelog": "Process freeze detector."
-        },
-        {
-            "version": "1.11.8",
-            "changelog": "Scripting setup now via exec file instead of stdin.write."
-        },
-        {
-            "version": "1.12.0",
-            "changelog": "New Experimental Ban System!"
-        },
-        {
-            "version": "1.12.1",
-            "changelog": "Quickfix: solved empty list issue with ban system"
-        },
-        {
-            "version": "1.13.0",
-            "changelog": "Added admin name to chat/discord messages. Hiding default resources. Uptime in /status. Spawn errors now shown in dashboard."
-        },
-        {
-            "version": "1.14.0",
-            "changelog": "Added Server CFG Editor"
-        },
-        {
-            "version": "1.14.1",
-            "changelog": "Added console log to diagnostics page. Removed port checking on server start."
         }
     ]
 }

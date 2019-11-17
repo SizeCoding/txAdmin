@@ -5,11 +5,14 @@
     <h2>{{serverName}} Dashboard</h2>
 </div>
 
+<!-- FIXME: temp missing resource detector -->
 {{if(options.errorMessage)}}
 <div class="row justify-content-md-center">
     <div class="col-md-6 ">
         <div class="alert alert-danger border-danger  text-center" role="alert">
-            {{errorMessage|safe}}
+            <strong>Incompatible txAdminClient version.</strong> <br>
+            Please delete the txAdminClient resource from your server. <br>
+            Starting from v1.6.0 all <strong>txAdmin</strong> resources are injected automatically.
         </div>
     </div>
 </div>
@@ -23,37 +26,35 @@
             <div class="card-header font-weight-bold">FXServer Control:</div>
             <div class="card-body text-center align-middle">
                 <button onclick="controlAction('start')" class="btn btn-outline-{{perms.controlsClass}} btn-lg mx-auto m-2"
-                    type="button" id="ctrl-start" {{perms.controls}}>START</button> &nbsp;
+                    type="button" id="ctrl-start" {{perms.controls}}>DEMARRER</button> &nbsp;
                 <button onclick="controlAction('restart')" class="btn btn-outline-{{perms.controlsClass}} btn-lg mx-auto m-2"
-                    type="button" id="ctrl-restart" {{perms.controls}}>RESTART</button> &nbsp;
+                    type="button" id="ctrl-restart" {{perms.controls}}>REDEMARRER</button> &nbsp;
                 <button onclick="controlAction('stop')" class="btn btn-outline-{{perms.controlsClass}} btn-lg mx-auto m-2"
-                    type="button" id="ctrl-stop" {{perms.controls}}>STOP</button>
+                    type="button" id="ctrl-stop" {{perms.controls}}>ARRETER</button>
             </div>
         </div>
 
         <!-- Commands Card -->
         <div class="card card-accent-danger">
-            <div class="card-header font-weight-bold">Commands:</div>
+            <div class="card-header font-weight-bold">Commandes:</div>
             <div class="card-body">
                 <div class="form-group row">
-                    <label for="action" class="col-sm-4 col-form-label">Command</label>
+                    <label for="action" class="col-sm-4 col-form-label">Commande</label>
                     <div class="col-sm-8">
                         <select name="action" id="frm_action" class="form-control" required>
                             <option value="" disabled selected>&gt; SELECT</option>
                             <option value="admin_broadcast" {{perms.commandMessage}}>Broadcast Admin Message</option>
+                            <option value="admin_announce" {{perms.commandMessage}}>Flash info</option>
                             <option value="ensure_res" {{perms.commandResources}}>Start/Restart resource</option>
-                            <!-- <option value="restart_res" {{perms.commandResources}}>Restart resource</option> -->
-                            <!-- <option value="start_res" {{perms.commandResources}}>Start resource</option> -->
                             <option value="stop_res" {{perms.commandResources}}>Stop resource</option>
                             <option value="refresh_res" {{perms.commandResources}}>Refresh resources</option>
                             <option value="reinject_res" {{perms.commandResources}}>Re-Inject txAdmin resources</option>
-                            <option value="check_txaclient" {{perms.commandResources}}>Check txAdminClient</option>
                             <option value="kick_all" {{perms.commandKick}}>Kick all players</option>
                         </select>
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="action" class="col-sm-4 col-form-label">Parameter</label>
+                    <label for="action" class="col-sm-4 col-form-label">Paramètrer</label>
                     <div class="col-sm-8">
                         <input type="text" name="parameter" id="frm_parameter" class="form-control" placeholder=""
                             readonly required>
@@ -61,7 +62,7 @@
                 </div>
             </div>
             <div class="card-footer text-center">
-                <button type="button" id="frm_button" class="btn btn-outline-dark mx-auto">EXECUTE</button>
+                <button type="button" id="frm_button" class="btn btn-outline-dark mx-auto">EXECUTER</button>
             </div>
         </div>
 
@@ -147,9 +148,9 @@
         if (action !== 'start' && !window.confirm('Are you sure you want to ' + action + ' the server?')) {
             return;
         }
-        var notify = $.notify({ message: '<p class="text-center">Executing Command...</p>' }, {});
+        var notify = $.notify({ message: '<p class="text-center">Execution de la commande...</p>' }, {});
         $.ajax({
-            url: actionURL = '/fxserver/controls/' + action,
+            url: actionURL = '/fxControls/' + action,
             type: "GET",
             dataType: "json",
             timeout: 3000,
@@ -175,11 +176,11 @@
     //Commands with parameter required
     let paramRequiredCommands = [
         'admin_broadcast',
+        'admin_announce',
         'ensure_res',
         'restart_res',
         'start_res',
-        'stop_res',
-        'kick_all'
+        'stop_res'
     ];
 
     //EXECUTE button handler
@@ -194,17 +195,12 @@
         }
         if (paramRequiredCommands.indexOf(data.action) != -1 && !data.parameter.length) {
             var notify = $.notify({ message: '<p class="text-center font-weight-bold">This action require a parameter.</p>' }, { delay: 3000, type: 'danger' });
-            $("#frm_parameter").addClass('is-invalid');
-            $("#frm_parameter").focus();
             return;
-        }else{
-            $("#frm_parameter").removeClass('is-invalid');
         }
-
-        var notify = $.notify({ message: '<p class="text-center">Executing Command...</p>' }, {});
+        var notify = $.notify({ message: '<p class="text-center">Execution de la commande..</p>' }, {});
         $.ajax({
             type: "POST",
-            url: '/fxserver/commands',
+            url: '/fxCommands',
             timeout: 2000,
             data: data,
             success: function (data) {
@@ -218,12 +214,11 @@
                 notify.update('message', message);
             }
         });
+        $("#frm_parameter").val('');
     });
 
     //Ensure the parameter input is only enabled when neccessary.
     $('#frm_action').change(function () {
-        $("#frm_parameter").removeClass('is-invalid');
-        $("#frm_parameter").val('');
         var action = $("#frm_action").val();
         if (paramRequiredCommands.indexOf(action) != -1) {
             $("#frm_parameter").prop('readonly', false);

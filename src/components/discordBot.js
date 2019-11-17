@@ -1,9 +1,8 @@
 //Requires
-const fs = require('fs-extra');
+const fs = require('fs');
 const Discord = require('discord.js');
 const { dir, log, logOk, logWarn, logError, cleanTerminal } = require('../extras/console');
 const context = 'DiscordBot';
-const humanizeDuration = require('humanize-duration');
 
 
 module.exports = class DiscordBot {
@@ -12,7 +11,6 @@ module.exports = class DiscordBot {
         this.client = null;
         this.cronFunc = null;
         this.messages = [];
-        this.spamLimitCache = {}
         if(!this.config.enabled){
             logOk('::Disabled by the config file.', context);
         }else{
@@ -62,14 +60,9 @@ module.exports = class DiscordBot {
 
         try {
             let chan = this.client.channels.find(x => x.id === this.config.announceChannel);
-            if(chan === null){
-                logError(`The announcements channel could not be found. Check the ID: ${this.config.announceChannel}`, context);
-                return;
-            }
-
             chan.send(message);
         } catch (error) {
-            logError(`Error sending Discord announcement: ${error.message}`, context);
+            logError(`Error sending Discord announcement: ${error.message}`);
         }
     }//Final sendAnnouncement()
 
@@ -112,34 +105,19 @@ module.exports = class DiscordBot {
 
         //Checking if message is a command
         if(message.content.startsWith(this.config.statusCommand)){
-            //Check spam limiter
-            if(!this.spamLimitChecker(this.config.statusCommand, message.channel.id)){
-                if(globals.config.verbose) log(`Spam prevented for command "${this.config.statusCommand}" in channel "${message.channel.name}".`, context);
-                return;
-            }
-            this.spamLimitRegister(this.config.statusCommand, message.channel.id);
-
             //Prepare message's data
             let dataServer = globals.monitor.statusServer; //shorthand much!?
             let color = (dataServer.online)? 0x74EE15 : 0xF000FF;
-            let titleKey = (dataServer.online)?  'discord.status_online' : 'discord.status_offline';
-            let title = globals.translator.t(titleKey, {servername: globals.config.serverName});
+            let title = (dataServer.online)
+                ? `${globals.config.serverName} est actuellement **En ligne**!`
+                : `${globals.config.serverName} est actuellement **Hors ligne**!`;
             let players = (dataServer.online && typeof dataServer.players !== 'undefined')? dataServer.players.length : '--';
             let desc = '';
             if(globals.config.forceFXServerPort || globals.fxRunner.fxServerPort){
                 let port = (globals.config.forceFXServerPort)? globals.config.forceFXServerPort : globals.fxRunner.fxServerPort;
                 desc += `**IP:** ${globals.config.publicIP}:${port}\n`;
-                desc += `**Players:** ${players}\n`;
+                desc += `**Joueur(s):** ${players}\n`;
             }
-            let elapsed = Math.round(Date.now()/1000) - globals.fxRunner.tsChildStarted; //seconds
-            let humanizeOptions = {
-                language: globals.translator.t('$meta.humanizer_language'),
-                round: true,
-                units: ['d', 'h', 'm', 's'],
-                fallbacks: ['en']
-            }
-            let uptime = humanizeDuration(elapsed*1000, humanizeOptions);
-            desc += `**Uptime:** ${uptime} \n`;
 
             //Prepare object
             out = new Discord.RichEmbed();
@@ -147,27 +125,10 @@ module.exports = class DiscordBot {
             out.setColor(color);
             out.setDescription(desc);
 
-        }else if(message.content.startsWith('/txadmin')){
-            //Prepare object
-            out = new Discord.RichEmbed();
-            out.setTitle(`${globals.config.serverName} uses txAdmin v${globals.version.current}!`);
-            out.setColor(0x4DEEEA);
-            out.setDescription(`Checkout the project:\n Forum: https://forum.fivem.net/t/530475\n Discord: https://discord.gg/f3TsfvD`);
-
         }else{
-            //Finds the command
-            let cmd = this.messages.find((staticMessage) => {return message.content.startsWith(staticMessage.trigger)});
-            if(!cmd) return;
-
-            //Check spam limiter
-            if(!this.spamLimitChecker(cmd.trigger, message.channel.id)){
-                if(globals.config.verbose) log(`Spam prevented for command "${cmd.trigger}" in channel "${message.channel.name}".`, context);
-                return;
-            }
-            this.spamLimitRegister(cmd.trigger, message.channel.id);
-
-            //Sets static message
-            out = cmd.message;
+            let msg = this.messages.find((staticMessage) => {return message.content.startsWith(staticMessage.trigger)});
+            if(!msg) return;
+            out = msg.message;
 
         }
 
@@ -196,7 +157,7 @@ module.exports = class DiscordBot {
         let jsonData = null;
 
         try {
-            raw = await fs.readFile(this.config.messagesFilePath, 'utf8');
+            raw = fs.readFileSync(this.config.messagesFilePath, 'utf8');
         } catch (error) {
             logError('Unable to load discord messages. (cannot read file, please read the documentation)', context);
             logError(error.message, context);
@@ -232,41 +193,5 @@ module.exports = class DiscordBot {
         this.messages = jsonData;
         if(globals.config.verbose) log(`Discord messages file loaded. Found: ${this.messages.length}`, context);
     }
-
-
-    //================================================================
-    /**
-     * Checks the spamLimitCache and returns false if its still in cooldown
-     * @param {string} cmd
-     * @param {string} chan
-     */
-    spamLimitChecker(cmd, chan){
-        let tag = `${chan}:${cmd}`;
-        let now = (Date.now() / 1000).toFixed();
-        return (typeof this.spamLimitCache[tag] === 'undefined' || (now - this.spamLimitCache[tag] > this.config.commandCooldown))
-    }//Final spamLimitChecker()
-
-
-    //================================================================
-    /**
-     * Registers a command execution in the spamLimitCache
-     * @param {string} cmd
-     * @param {string} chan
-     */
-    spamLimitRegister(cmd, chan){
-        this.spamLimitCache[`${chan}:${cmd}`] = (Date.now() / 1000).toFixed();
-    }//Final spamLimitRegister()
-
-
-    //================================================================
-    /**
-     * TEST: fetch user data
-     * @param {string} uid
-     */
-    // async testFetchUser(uid){
-    //     let testUser = await this.client.fetchUser('272800190639898628');
-    //     dir(testUser)
-    //     dir(testUser.avatarURL)
-    // }
 
 } //Fim DiscordBot()

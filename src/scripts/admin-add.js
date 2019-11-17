@@ -5,7 +5,7 @@ helpers.dependencyChecker();
 //Requires
 const fs = require('fs');
 const readline = require('readline');
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcrypt');
 const { promisify } = require('util');
 const { dir, log, logOk, logWarn, logError, cleanTerminal } = require('../extras/console');
 cleanTerminal()

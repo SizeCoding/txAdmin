@@ -1,25 +1,5 @@
 //Requires
 const fs = require('fs');
-const net = require('net');
-const path = require('path');
-
-
-//================================================================
-/**
- * txAdmin in ASCII
- */
-function txAdminASCII() {
-    //NOTE: precalculating the ascii art for efficiency
-    // const figlet = require('figlet');
-    // let ascii = figlet.textSync('txAdmin');
-    // let b64 = Buffer.from(ascii).toString('base64');
-    // console.log(b64);
-    const preCalculated = `ICBfICAgICAgICAgICAgXyAgICAgICBfICAgICAgICAgICBfICAgICAgIAogfCB8X19fICBfX
-    yAgIC8gXCAgIF9ffCB8XyBfXyBfX18gKF8pXyBfXyAgCiB8IF9fXCBcLyAvICAvIF8gXCAvIF9gIHwgJ18gYCBfIFx8IHwg
-    J18gXCAKIHwgfF8gPiAgPCAgLyBfX18gXCAoX3wgfCB8IHwgfCB8IHwgfCB8IHwgfAogIFxfXy9fL1xfXC9fLyAgIFxfXF9
-    fLF98X3wgfF98IHxffF98X3wgfF98CiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA=`;
-    return Buffer.from(preCalculated, 'base64').toString('ascii');
-}
 
 
 //================================================================
@@ -89,42 +69,32 @@ function parseSchedule(schedule, filter) {
 //================================================================
 /**
  * Reads CFG Path and return the file contents, or throw error if:
- *  - the path is not valid (must be absolute)
+ *  - the path is not valid (absolute or relative)
  *  - cannot read the file data
- * @param {string} cfgFullPath
+ * @param {string} cfgPath
+ * @param {string} basePath
  */
-function getCFGFileData(cfgPath) {
-    //Validating if the path is absolute
-    if(!path.isAbsolute(cfgPath)){
-        throw new Error("File path must be absolute.");
-    }
-
-    //Validating file existence
-    if(!fs.existsSync(cfgPath)){
+function getCFGFile(cfgPath, basePath) {
+    let validCfgPath;
+    let rawCfgFile;
+    let cfgPathAbsoluteTest = fs.existsSync(cfgPath);
+    let cfgPathRelativeTest = fs.existsSync(`${basePath}/${cfgPath}`);
+    if(cfgPathAbsoluteTest || cfgPathRelativeTest){
+        validCfgPath = (cfgPathAbsoluteTest)? cfgPath : `${basePath}/${cfgPath}`;
+    }else{
         if(cfgPath.includes('cfg')){
             throw new Error("File doesn't exist or its unreadable.");
         }else{
             throw new Error("File doesn't exist or its unreadable. Make sure to include the CFG file in the path, and not just the directory that contains it.");
         }
     }
-
-    //Reading file
     try {
-        return fs.readFileSync(cfgPath).toString();
+        rawCfgFile = fs.readFileSync(validCfgPath).toString();
     } catch (error) {
         throw new Error("Cannot read CFG Path file.");
     }
-}
 
-
-//================================================================
-/**
- * Returns the absolute path of the given CFG Path
- * @param {string} cfgPath
- * @param {string} basePath
- */
-function resolveCFGFilePath(cfgPath, basePath) {
-    return (path.isAbsolute(cfgPath))? cfgPath : path.resolve(basePath, cfgPath);
+    return rawCfgFile;
 }
 
 
@@ -159,7 +129,7 @@ function getFXServerPort(rawCfgFile) {
     if(!matches.length) throw new Error("No endpoints found");
 
     let validTCPEndpoint = matches.find((match) => {
-        return (match.type.toLowerCase() === 'tcp' && (match.interface === '0.0.0.0' || match.interface === '127.0.0.1'))
+        return (match.type.toLowerCase() === 'tcp' && match.interface === '0.0.0.0')
     })
     if(!validTCPEndpoint) throw new Error("You MUST have a TCP endpoint with interface 0.0.0.0");
 
@@ -168,8 +138,6 @@ function getFXServerPort(rawCfgFile) {
     })
     if(!validUDPEndpoint) throw new Error("You MUST have at least one UDP endpoint");
 
-    //FIXME: Think of something to make this work:
-    //  https://forum.fivem.net/t/release-txadmin-manager-discord-bot-live-console-playerlist-autorestarter/530475/348?u=tabarra
     matches.forEach((m) => {
         if(m.port !== matches[0].port) throw new Error("All endpoints MUST have the same port")
     });
@@ -179,11 +147,10 @@ function getFXServerPort(rawCfgFile) {
 
 
 
+
 module.exports = {
-    txAdminASCII,
     dependencyChecker,
     parseSchedule,
-    getCFGFileData,
-    resolveCFGFilePath,
+    getCFGFile,
     getFXServerPort,
 }

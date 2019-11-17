@@ -3,22 +3,21 @@ const helpers = require('./extras/helpers');
 helpers.dependencyChecker();
 
 //Requires
-const { dir, log, logOk, logWarn, logError, cleanTerminal, setTTYTitle } = require('./extras/console');
+const figlet = require('figlet');
+const { dir, log, logOk, logWarn, logError, cleanTerminal } = require('./extras/console');
 const txAdmin = require('./txAdmin.js');
 
 
 //==============================================================
 //FIXME: I should be using dependency injection or something
 globals = {
-    authenticator: null,
-    discordBot: null,
-    fxRunner: null,
-    logger: null,
     monitor: null,
-    translator: null,
-    webConsole: null,
+    logger: null,
+    discordBot: null,
+    authenticator: null,
     webServer: null,
-    database: null,
+    webConsole: null,
+    fxRunner: null,
     config: null,
     version: {
         current: '--',
@@ -26,30 +25,23 @@ globals = {
         changelog: '--',
         allVersions: []
     },
-    dashboardErrorMessage: null,
-    //FIXME: remove with the Extensions update
-    intercomTempLog: [],
-    intercomTempResList: null,
+    resourceWrongVersion: null //FIXME: temp hack
 }
 
 
 //==============================================================
 //Print MOTD
-let ascii = helpers.txAdminASCII()
+let ascii = figlet.textSync('txAdmin');
 let separator = '='.repeat(46);
 let motd = `${separator}\n${ascii}\n${separator}`;
 cleanTerminal();
-setTTYTitle();
 console.log(motd);
 
 //Detect server profile
 let serverProfile;
 if(process.argv[2]){
-    serverProfile = process.argv[2].replace(/[^a-z0-9._-]/gi, "").trim();
-    if(!serverProfile.length){
-        logError(`Invalid server profile. Are you using Google Translator on the Github instructions page? Make sure there are no additional spaces in your command.`);
-        process.exit();
-    }else if(serverProfile === 'example'){
+    serverProfile = process.argv[2].replace(/[^a-z0-9._-]/gi, "");
+    if(serverProfile === 'example'){
         logError(`You can't use the 'example' profile.`);
         process.exit();
     }
@@ -60,38 +52,10 @@ if(process.argv[2]){
 }
 
 //Start txAdmin
-setTTYTitle(serverProfile);
 const app = new txAdmin(serverProfile);
 
 
 //==============================================================
-//Freeze detector
-let hdTimer = Date.now();
-setInterval(() => {
-    let now = Date.now();
-    if(now - hdTimer > 2000){
-        let sep = `=`.repeat(64);
-        if(process.env.os.toLowerCase().includes('windows')){
-            let msgLines = [
-                `Major process freeze detected.`,
-                `If using CMD or a 'start.bat' file, make sure to disable QuickEdit mode.`,
-                `Join our Discord and type '!quickedit' for instructions.`,
-            ]
-            // globals.dashboardErrorMessage = msgLines.join(`<br>\n`);
-            setTimeout(() => {
-                logError(sep);
-                msgLines.forEach(line => logError(line));
-                logError(sep);
-            }, 1000);
-        }else{
-            logError(sep);
-            logError('Major process freeze detected.');
-            logError(sep);
-        }
-    }
-    hdTimer = now;
-}, 500);
-
 //Handle any stdio error
 process.stdin.on('error', (data) => {});
 process.stdout.on('error', (data) => {});

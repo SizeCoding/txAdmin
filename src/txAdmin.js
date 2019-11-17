@@ -38,14 +38,11 @@ module.exports = class txAdmin {
         this.startDiscordBot(profileConfig.discordBot).catch((err) => {
             HandleFatalError(err, 'DiscordBot');
         });
-        this.startFXRunner(profileConfig.fxRunner).catch((err) => {
-            HandleFatalError(err, 'FXRunner');
+        this.startFXServer(profileConfig.fxRunner).catch((err) => {
+            HandleFatalError(err, 'FXServer');
         });
         this.startLogger(profileConfig.logger).catch((err) => {
             HandleFatalError(err, 'Logger');
-        });
-        this.startTranslator().catch((err) => {
-            HandleFatalError(err, 'Translator');
         });
         this.startMonitor(profileConfig.monitor).catch((err) => {
             HandleFatalError(err, 'Monitor');
@@ -56,20 +53,12 @@ module.exports = class txAdmin {
         this.startWebConsole(profileConfig.webConsole).catch((err) => {
             HandleFatalError(err, 'WebConsole');
         });
-        //FIXME: dependency order
-        //  - translator before monitor
-        //  - webserver before webconsole
 
-        this.startDatabase().catch((err) => {
-            HandleFatalError(err, 'Database');
-        });
-
-        //Run Update Checker every 15 minutes
+        //Run Update Checker every 30 minutes
         const updateChecker = require('./extras/updateChecker');
         updateChecker();
-        setInterval(updateChecker, 15 * 60 * 1000);
+        setInterval(updateChecker, 30 * 60 * 1000);
     }
-
 
     //==============================================================
     async startAuthenticator(config){
@@ -84,7 +73,7 @@ module.exports = class txAdmin {
     }
 
     //==============================================================
-    async startFXRunner(config){
+    async startFXServer(config){
         const FXRunner = require('./components/fxRunner')
         globals.fxRunner = new FXRunner(config);
     }
@@ -102,12 +91,6 @@ module.exports = class txAdmin {
     }
 
     //==============================================================
-    async startTranslator(){
-        const Translator = require('./components/translator')
-        globals.translator = new Translator();
-    }
-
-    //==============================================================
     async startWebServer(config){
         const WebServer = require('./components/webServer')
         globals.webServer = new WebServer(config);
@@ -118,13 +101,6 @@ module.exports = class txAdmin {
         const WebConsole = require('./components/webConsole')
         globals.webConsole = new WebConsole(config);
     }
-
-    //==============================================================
-    //FIXME: experimental database
-    async startDatabase(){
-        const Database = require('./components/database')
-        globals.database = new Database();
-    }
 }
 
 
@@ -132,7 +108,7 @@ module.exports = class txAdmin {
 function HandleFatalError(err, context){
     if(err.message.includes('Cannot find module')){
         logError(`Error starting '${context}' module. Make sure you executed 'npm install'.`)
-        if(globals.config.verbose) dir(err);
+        if(globals.config.verbose) dir(error);
     }else{
         logError(`Error starting '${context}' module: ${err.message}`)
         logError(err.stack, context)
